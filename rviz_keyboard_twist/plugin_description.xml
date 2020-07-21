@@ -1,0 +1,9 @@
+<library path="lib/libkeyboard_twist_panel">
+  <class name="rviz_keyboard_twist/KeyboardTwist"
+         type="autolabor_plugin::KeyboardTwistPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget allowing simple diff-drive style robot base control.
+    </description>
+  </class>
+</library>
