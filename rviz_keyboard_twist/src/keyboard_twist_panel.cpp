@@ -85,6 +85,7 @@ namespace autolabor_plugin {
     }
 
     void KeyboardTwistPanel::keyPressEvent(QKeyEvent *event) {
+        last_pressed_time_ = ros::Time::now();
         if ((event->key() == Qt::Key::Key_Up || event->key() == Qt::Key::Key_W) && !event->isAutoRepeat()) {
             button_up_ = true;
         } else if ((event->key() == Qt::Key::Key_Down || event->key() == Qt::Key::Key_S) && !event->isAutoRepeat()) {
@@ -128,6 +129,13 @@ namespace autolabor_plugin {
     }
 
     void KeyboardTwistPanel::sendVel() {
+        if (ros::Time::now() - last_pressed_time_ >= ros::Duration(1.0)) {
+            button_up_ = false;
+            button_down_ = false;
+            button_left_ = false;
+            button_right_ = false;
+        }
+
         if (ros::ok() && velocity_publisher_ && send_flag_) {
             double v = 0.0, w = 0.0;
             if (button_up_ != button_down_ && button_up_) {

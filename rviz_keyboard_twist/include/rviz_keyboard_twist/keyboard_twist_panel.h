@@ -56,6 +56,7 @@ namespace autolabor_plugin {
 
         ros::NodeHandle nh_;
         ros::Publisher velocity_publisher_;
+        ros::Time last_pressed_time_;
 
     private:
         template<typename ...Args>
