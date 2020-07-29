@@ -1,7 +1,8 @@
 #ifndef SRC_KEYBOARD_TWIST_PANEL_H
 #define SRC_KEYBOARD_TWIST_PANEL_H
 
-#include "string.h"
+#include "string"
+#include "map"
 
 #include "ros/ros.h"
 #include "rviz/panel.h"
@@ -51,8 +52,10 @@ namespace autolabor_plugin {
     private:
         QString output_topic_;
         bool send_flag_;
+        bool stop_flag_;
         double max_v_, max_w_;
         bool button_up_, button_down_, button_left_, button_right_;
+        std::map<int, int> key_pressed_flag_;
 
         ros::NodeHandle nh_;
         ros::Publisher velocity_publisher_;
@@ -74,6 +77,14 @@ namespace autolabor_plugin {
             }
             return buffer;
         }
+
+        bool checkUp();
+
+        bool checkDown();
+
+        bool checkLeft();
+
+        bool checkRight();
     };
 }
 

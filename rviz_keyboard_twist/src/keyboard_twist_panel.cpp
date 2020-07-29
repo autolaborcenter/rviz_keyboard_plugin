@@ -1,3 +1,4 @@
+#include <QtCore/QCoreApplication>
 #include "rviz_keyboard_twist/keyboard_twist_panel.h"
 #include "geometry_msgs/Twist.h"
 
@@ -5,7 +6,6 @@
 #include "QVBoxLayout"
 
 #include "QTimer"
-
 
 namespace autolabor_plugin {
 
@@ -85,27 +85,133 @@ namespace autolabor_plugin {
     }
 
     void KeyboardTwistPanel::keyPressEvent(QKeyEvent *event) {
+        // std::cout << event->timestamp() << "press : " << event->key() << std::endl;
         last_pressed_time_ = ros::Time::now();
-        if ((event->key() == Qt::Key::Key_Up || event->key() == Qt::Key::Key_W) && !event->isAutoRepeat()) {
-            button_up_ = true;
-        } else if ((event->key() == Qt::Key::Key_Down || event->key() == Qt::Key::Key_S) && !event->isAutoRepeat()) {
-            button_down_ = true;
-        } else if ((event->key() == Qt::Key::Key_Left || event->key() == Qt::Key::Key_A) && !event->isAutoRepeat()) {
-            button_left_ = true;
-        } else if ((event->key() == Qt::Key::Key_Right || event->key() == Qt::Key::Key_D) && !event->isAutoRepeat()) {
-            button_right_ = true;
+        if (!event->isAutoRepeat()) {
+            key_pressed_flag_[event->key()] = 1;
+            switch (event->key()) {
+                case Qt::Key::Key_Up:
+                case Qt::Key::Key_W:
+                    button_up_ = true;
+                    break;
+                case Qt::Key::Key_Down:
+                case Qt::Key::Key_X:
+                    button_down_ = true;
+                    break;
+                case Qt::Key::Key_Left:
+                case Qt::Key::Key_A:
+                    button_left_ = true;
+                    break;
+                case Qt::Key::Key_Right:
+                case Qt::Key::Key_D:
+                    button_right_ = true;
+                    break;
+                case Qt::Key::Key_Q:
+                    button_left_ = true;
+                    button_up_ = true;
+                    break;
+                case Qt::Key::Key_E:
+                    button_right_ = true;
+                    button_up_ = true;
+                    break;
+                case Qt::Key::Key_Z:
+                    button_left_ = true;
+                    button_down_ = true;
+                    break;
+                case Qt::Key::Key_C:
+                    button_right_ = true;
+                    button_down_ = true;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
+    bool KeyboardTwistPanel::checkUp() {
+        return key_pressed_flag_[Qt::Key::Key_Up] + key_pressed_flag_[Qt::Key::Key_W] +
+               key_pressed_flag_[Qt::Key::Key_Q] + key_pressed_flag_[Qt::Key::Key_E] != 0;
+    }
+
+    bool KeyboardTwistPanel::checkDown() {
+        return key_pressed_flag_[Qt::Key::Key_Down] + key_pressed_flag_[Qt::Key::Key_X] +
+               key_pressed_flag_[Qt::Key::Key_Z] + key_pressed_flag_[Qt::Key::Key_C] != 0;
+    }
+
+    bool KeyboardTwistPanel::checkLeft() {
+        return key_pressed_flag_[Qt::Key::Key_Left] + key_pressed_flag_[Qt::Key::Key_A] +
+               key_pressed_flag_[Qt::Key::Key_Q] + key_pressed_flag_[Qt::Key::Key_Z] != 0;
+    }
+
+    bool KeyboardTwistPanel::checkRight() {
+        return key_pressed_flag_[Qt::Key::Key_Right] + key_pressed_flag_[Qt::Key::Key_D] +
+               key_pressed_flag_[Qt::Key::Key_E] + key_pressed_flag_[Qt::Key::Key_C] != 0;
+    }
+
     void KeyboardTwistPanel::keyReleaseEvent(QKeyEvent *event) {
-        if ((event->key() == Qt::Key::Key_Up || event->key() == Qt::Key::Key_W) && !event->isAutoRepeat()) {
-            button_up_ = false;
-        } else if ((event->key() == Qt::Key::Key_Down || event->key() == Qt::Key::Key_S) && !event->isAutoRepeat()) {
-            button_down_ = false;
-        } else if ((event->key() == Qt::Key::Key_Left || event->key() == Qt::Key::Key_A) && !event->isAutoRepeat()) {
-            button_left_ = false;
-        } else if ((event->key() == Qt::Key::Key_Right || event->key() == Qt::Key::Key_D) && !event->isAutoRepeat()) {
-            button_right_ = false;
+        // std::cout << event->timestamp() << "release : " << event->key() << std::endl;
+        if (!event->isAutoRepeat()) {
+            key_pressed_flag_[event->key()] = 0;
+            switch (event->key()) {
+                case Qt::Key::Key_Up:
+                case Qt::Key::Key_W:
+                    if (!checkUp()) {
+                        button_up_ = false;
+                    }
+                    break;
+                case Qt::Key::Key_Down:
+                case Qt::Key::Key_X:
+                    if (!checkDown()) {
+                        button_down_ = false;
+                    }
+                    break;
+                case Qt::Key::Key_Left:
+                case Qt::Key::Key_A:
+                    if (!checkLeft()) {
+                        button_left_ = false;
+                    }
+                    break;
+                case Qt::Key::Key_Right:
+                case Qt::Key::Key_D:
+                    if (!checkRight()) {
+                        button_right_ = false;
+                    }
+                    break;
+                case Qt::Key::Key_Q:
+                    if (!checkUp()) {
+                        button_up_ = false;
+                    }
+                    if (!checkLeft()) {
+                        button_left_ = false;
+                    }
+                    break;
+                case Qt::Key::Key_E:
+                    if (!checkRight()) {
+                        button_right_ = false;
+                    }
+                    if (!checkUp()) {
+                        button_up_ = false;
+                    }
+                    break;
+                case Qt::Key::Key_Z:
+                    if (!checkLeft()) {
+                        button_left_ = false;
+                    }
+                    if (!checkDown()) {
+                        button_down_ = false;
+                    }
+                    break;
+                case Qt::Key::Key_C:
+                    if (!checkRight()) {
+                        button_right_ = false;
+                    }
+                    if (!checkDown()) {
+                        button_down_ = false;
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -120,7 +226,7 @@ namespace autolabor_plugin {
     }
 
     void KeyboardTwistPanel::setFlag(int data) {
-        send_flag_ = data == Qt::Checked;
+        send_flag_ = (data == Qt::Checked);
         if (send_flag_) {
             grabKeyboard();
         } else {
@@ -129,35 +235,41 @@ namespace autolabor_plugin {
     }
 
     void KeyboardTwistPanel::sendVel() {
-        if (ros::Time::now() - last_pressed_time_ >= ros::Duration(1.0)) {
-            button_up_ = false;
-            button_down_ = false;
-            button_left_ = false;
-            button_right_ = false;
-        }
+        if (ros::ok() && velocity_publisher_) { // 话题存在并且ros启动
+            if ((button_up_ || button_down_ || button_left_ || button_right_) &&
+                ros::Time::now() - last_pressed_time_ <= ros::Duration(1.0) && send_flag_) {
+                double v = 0.0, w = 0.0;
+                if (button_up_ != button_down_ && button_up_) {
+                    v = max_v_;
+                } else if (button_up_ != button_down_ && button_down_) {
+                    v = -max_v_;
+                }
 
-        if (ros::ok() && velocity_publisher_ && send_flag_) {
-            double v = 0.0, w = 0.0;
-            if (button_up_ != button_down_ && button_up_) {
-                v = max_v_;
-            } else if (button_up_ != button_down_ && button_down_) {
-                v = -max_v_;
+                if (button_left_ != button_right_ && button_left_) {
+                    w = max_w_;
+                } else if (button_left_ != button_right_ && button_right_) {
+                    w = -max_w_;
+                }
+
+                geometry_msgs::Twist msg;
+                msg.linear.x = v;
+                msg.linear.y = 0;
+                msg.linear.z = 0;
+                msg.angular.x = 0;
+                msg.angular.y = 0;
+                msg.angular.z = w;
+                velocity_publisher_.publish(msg);
+
+                if (v != 0.0 || w != 0.0) {
+                    stop_flag_ = false;
+                }
+            } else {
+                if (!stop_flag_) {
+                    geometry_msgs::Twist msg;
+                    velocity_publisher_.publish(msg);
+                    stop_flag_ = true;
+                }
             }
-
-            if (button_left_ != button_right_ && button_left_) {
-                w = max_w_;
-            } else if (button_left_ != button_right_ && button_right_) {
-                w = -max_w_;
-            }
-
-            geometry_msgs::Twist msg;
-            msg.linear.x = v;
-            msg.linear.y = 0;
-            msg.linear.z = 0;
-            msg.angular.x = 0;
-            msg.angular.y = 0;
-            msg.angular.z = w;
-            velocity_publisher_.publish(msg);
         }
     }
 
