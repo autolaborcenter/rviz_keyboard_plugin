@@ -122,6 +122,9 @@ namespace autolabor_plugin {
                     button_right_ = true;
                     button_down_ = true;
                     break;
+                case Qt::Key::Key_0:
+                    active_box_->setCheckState(Qt::Unchecked);
+                    break;
                 default:
                     break;
             }
